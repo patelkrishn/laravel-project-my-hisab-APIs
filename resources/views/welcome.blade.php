@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    E-hisab API's
+                    E-Hisab API's
                 </div>
 
                 {{-- <div class="links">

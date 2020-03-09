@@ -14,10 +14,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['namespace' => 'Api\Admin','prefix'=>'admin'], function () {
+    Route::post('login','AuthController@login');
+    Route::post('register','AuthController@register');
+    Route::post('me','AuthController@me')->middleware('auth:admin');
+    Route::post('logout','AuthController@logout')->middleware('auth:admin');
 });
 
-Route::post('login','AuthController@login');
-Route::post('register','AuthController@register');
-Route::post('me','AuthController@me');
+Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
+    Route::post('login','AuthController@login');
+    Route::post('register','AuthController@register');
+    Route::post('me','AuthController@me')->middleware('auth:seller');
+    Route::post('logout','AuthController@logout')->middleware('auth:seller');
+    Route::apiResource('product','ProductController')->middleware('auth:seller');
+});
+
+Route::group(['namespace' => 'Api\User','prefix'=>'user'], function () {
+    Route::post('login','AuthController@login');
+    Route::post('register','AuthController@register');
+    Route::post('me','AuthController@me')->middleware('auth:api');
+    Route::post('logout','AuthController@logout')->middleware('auth:api');
+});

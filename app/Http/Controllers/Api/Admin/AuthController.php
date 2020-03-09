@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\User;
-use Hash;
+namespace App\Http\Controllers\Api\Admin;
 use Auth;
+
+use Hash;
+use App\User;
+use App\Admin;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
@@ -16,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        // $this->middleware('auth:api');
     }
 
     /**
@@ -36,7 +38,7 @@ class AuthController extends Controller
     }
     public function register(Request $request)
     {
-        User::create([
+        Admin::create([
             'name'=>$request->name,
             'email'=>$request->email,
             'mobile'=>$request->mobile,
@@ -64,7 +66,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        auth()->logout();
+        $this->guard()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
@@ -102,7 +104,7 @@ class AuthController extends Controller
      */
     public function guard()
     {
-        return Auth::guard();
+        return Auth::guard('admin');
     }
 
 }

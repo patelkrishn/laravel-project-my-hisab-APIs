@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use Illuminate\Http\Request;
+use App\Model\Seller\Product;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -14,7 +16,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return response()->json(['error' => 'Unauthorized'], 401);
+        $product=Product::where('seller_id',Auth::user()->id)->get();
+        return response()->json(['products' => $product], 200);
     }
 
     /**
@@ -25,7 +28,15 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Product::create([
+            'seller_id'=>Auth::user()->id,
+            'product_name'=>$request->product_name,
+            'product_sku'=>$request->product_sku,
+            'product_price'=>$request->product_price,
+            'product_stock_quantity'=>$request->product_stock_quantity,
+            'product_total_sales'=>$request->product_total_sales,
+        ]);
+        return response()->json(['message'=>'Product added succesfully.'],200);
     }
 
     /**
@@ -36,7 +47,8 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product=Product::where('id',$id)->first();
+        return response()->json(['product' => $product], 200);
     }
 
     /**
@@ -48,7 +60,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        Product::where('id',$id)->update([
+            'product_name'=>$request->product_name,
+            'product_sku'=>$request->product_sku,
+            'product_price'=>$request->product_price,
+            'product_stock_quantity'=>$request->product_stock_quantity,
+            'product_total_sales'=>$request->product_total_sales,
+        ]);
+        return response()->json(['message'=>'Product update successfully.'],200);
     }
 
     /**
@@ -59,6 +78,9 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if (Product::where('id',$id)->delete()) {
+            return response()->json(['message'=>'Product delete successfully.'],200);
+        }
+        return response()->json(['message'=>'Problem while deleting product.'],226);
     }
 }

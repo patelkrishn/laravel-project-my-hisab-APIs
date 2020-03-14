@@ -16,8 +16,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product=Product::where('seller_id',Auth::user()->id)->get();
-        return response()->json(['products' => $product], 200);
+        $product=Product::where(['seller_id'=>Auth::user()->id,'is_delete'=>0])->get();
+        $output=json_encode($product);
+        return $output;
+        // return response()->json(['products' => $product], 200);
     }
 
     /**
@@ -35,6 +37,7 @@ class ProductController extends Controller
             'product_price'=>$request->product_price,
             'product_stock_quantity'=>$request->product_stock_quantity,
             'product_total_sales'=>$request->product_total_sales,
+            'is_delete'=>0,
         ]);
         return response()->json(['message'=>'Product added succesfully.'],200);
     }
@@ -78,7 +81,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        if (Product::where('id',$id)->delete()) {
+        if (Product::where('id',$id)->update(['is_delete'=>1])) {
             return response()->json(['message'=>'Product delete successfully.'],200);
         }
         return response()->json(['message'=>'Problem while deleting product.'],226);

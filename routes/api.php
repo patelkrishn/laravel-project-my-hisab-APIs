@@ -29,6 +29,8 @@ Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
     Route::apiResource('product','ProductController')->middleware('auth:seller');
     Route::apiResource('shop_address','ShopAddressController')->middleware('auth:seller');
     Route::apiResource('legal_information','LegalInformationController')->middleware('auth:seller');
+    Route::apiResource('inventory','InventoryController')->middleware('auth:seller');
+    Route::get('inventory/list/{id}','InventoryController@list')->middleware('auth:seller');
 });
 
 Route::group(['namespace' => 'Api\User','prefix'=>'user'], function () {

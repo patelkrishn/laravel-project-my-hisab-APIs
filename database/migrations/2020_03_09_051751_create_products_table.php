@@ -19,9 +19,9 @@ class CreateProductsTable extends Migration
             $table->longText('product_name');
             $table->string('product_sku');
             $table->float('product_price');
-            $table->bigInteger('product_stock_quantity')->default(0);
-            $table->bigInteger('product_total_sales')->default(0);
-            $table->tinyInteger('is_delete')->default(0);
+            $table->bigInteger('product_stock_quantity')->default(0)->nullable();
+            $table->bigInteger('product_total_sales')->default(0)->nullable();
+            $table->tinyInteger('is_delete')->default(0)->nullable();
             $table->timestamps();
         });
     }

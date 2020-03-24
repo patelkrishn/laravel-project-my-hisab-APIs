@@ -51,7 +51,8 @@ class ProductController extends Controller
     public function show($id)
     {
         $product=Product::where('id',$id)->first();
-        return json_encode($product);
+        return response()->json(['product'=>$product],200);
+        // return json_encode(['product'=>$product]);
     }
 
     /**

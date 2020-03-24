@@ -43,7 +43,7 @@ class AuthController extends Controller
             'email'=>$request->email,
             'mobile'=>$request->mobile,
             'password' => Hash::make($request->password),
-            'is_verified'=>$request->is_verified,
+            'is_verified'=>0,
         ]);
         $credentials = request(['email', 'password']);
         $token = $this->guard()->attempt($credentials);

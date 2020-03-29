@@ -37,7 +37,7 @@ class InvoiceController extends Controller
 
     private function getUniqueInvoiceId()
     {
-        $invoice_id=InvoiceId::max('invoice_name');
+        $invoice_id=InvoiceId::where('seller_id',Auth::user()->id)->max('invoice_name');
         if ($invoice_id==NULL) {
             InvoiceId::create([
                 'invoice_name'=>01,

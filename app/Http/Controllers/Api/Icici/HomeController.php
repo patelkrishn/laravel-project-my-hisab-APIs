@@ -14,7 +14,33 @@ class HomeController extends Controller
      */
     public function index()
     {
-        echo "success get request";
+        $curl = curl_init();
+
+curl_setopt_array($curl, array(
+	CURLOPT_URL => "https://mutual-fund-api.p.rapidapi.com/api/v1/latestNav/%7BschemeCode%7D",
+	CURLOPT_RETURNTRANSFER => true,
+	CURLOPT_FOLLOWLOCATION => true,
+	CURLOPT_ENCODING => "",
+	CURLOPT_MAXREDIRS => 10,
+	CURLOPT_TIMEOUT => 30,
+	CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+	CURLOPT_CUSTOMREQUEST => "GET",
+	CURLOPT_HTTPHEADER => array(
+		"x-rapidapi-host: mutual-fund-api.p.rapidapi.com",
+		"x-rapidapi-key: d92ffd462bmshfdf9897d5f8d5b7p187ba2jsn341b1835d2a1"
+	),
+));
+
+$response = curl_exec($curl);
+$err = curl_error($curl);
+
+curl_close($curl);
+
+if ($err) {
+	echo "cURL Error #:" . $err;
+} else {
+	echo $response;
+}
     }
 
     /**

@@ -31,7 +31,7 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
 
         if (! $token = $this->guard()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Login credentials does not match!'], 401);
         }
 
         return $this->respondWithToken($token);
@@ -67,7 +67,7 @@ class AuthController extends Controller
     public function logout()
     {
         $this->middleware('auth:seller');
-        auth()->logout();
+        $this->guard()->logout();
 
         return response()->json(['message' => 'Successfully logged out']);
     }
@@ -94,6 +94,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'access_token' => $token,
+            'user' => $this->guard()->user(),
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() 
         ]);

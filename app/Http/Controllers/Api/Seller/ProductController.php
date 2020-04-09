@@ -35,7 +35,7 @@ class ProductController extends Controller
             'product_name'=>$request->product_name,
             'product_sku'=>$request->product_sku,
             'product_price'=>$request->product_price,
-            'product_stock_quantity'=>$request->product_stock_quantity,
+            'product_stock_quantity'=>0,
             'product_total_sales'=>0,
             'is_delete'=>0,
         ]);

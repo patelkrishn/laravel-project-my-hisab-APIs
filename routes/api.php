@@ -42,9 +42,3 @@ Route::group(['namespace' => 'Api\User','prefix'=>'user'], function () {
     // Route::post('logout','AuthController@logout')->middleware('auth:api');
 });
 
-Route::group(['namespace' => 'Api\Icici','prefix'=>'icici'], function () {
-    Route::resource('home', 'homeController');
-    // Route::post('register','AuthController@register');
-    // Route::post('me','AuthController@me')->middleware('auth:api');
-    // Route::post('logout','AuthController@logout')->middleware('auth:api');
-});

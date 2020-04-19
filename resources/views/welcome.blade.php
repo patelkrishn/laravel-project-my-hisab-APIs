@@ -73,7 +73,7 @@
                 </div>
 
                 <div class="links">
-                    <a href="https://asatine.store">Asatine Store</a>
+                    <a href="https://store.asatine.com">Asatine Store</a>
                     <a href="https://asatine.com">Asatine Softwares</a>
                 </div>
             </div>

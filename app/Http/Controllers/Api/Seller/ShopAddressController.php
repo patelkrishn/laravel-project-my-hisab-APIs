@@ -17,10 +17,20 @@ class ShopAddressController extends Controller
      */
     public function index()
     {
-        $shop_address=ShopAddress::join('sellers','sellers.address_id','=','shop_addresses.id')
-                            ->where('sellers.id',Auth::user()->id)
-                            ->select('shop_addresses.*')
-                            ->first();
+        $shop_address = ShopAddress::join('sellers', 'sellers.address_id', '=', 'shop_addresses.id')
+            ->where('sellers.id', Auth::user()->id)
+            ->select('shop_addresses.*')
+            ->first();
+        if ($shop_address == null) {
+            $shop_address = array(
+                'shop_no' => null,
+                'street' => null,
+                'landmark' => null,
+                'city' => null,
+                'state' => null,
+                'pincode' => null
+            );
+        }
         return response()->json(['shop_address' => $shop_address], 200);
     }
 
@@ -32,24 +42,26 @@ class ShopAddressController extends Controller
      */
     public function store(Request $request)
     {
-        $shopAddressId=ShopAddress::insertGetId([
-            'shop_no'=>$request->shop_no,
-            'street'=>$request->street,
-            'landmark'=>$request->landmark,
-            'city'=>$request->city,
-            'state'=>$request->state,
-            'pincode'=>$request->pincode,
+        $shopAddressId = ShopAddress::insertGetId([
+            'shop_no' => $request->shop_no,
+            'street' => $request->street,
+            'landmark' => $request->landmark,
+            'city' => $request->city,
+            'state' => $request->state,
+            'pincode' => $request->pincode,
         ]);
         if ($shopAddressId) {
-            if (Seller::where('id',Auth::user()->id)->update([
-                'address_id'=>$shopAddressId
+            if (Seller::where('id', Auth::user()->id)->update([
+                'address_id' => $shopAddressId
             ])) {
+                if (Seller::where(['id' => Auth::user()->id, ['legal_information_id', '!=', null]])->count() == 1) {
+                    Seller::where('id', Auth::user()->id)->update(['is_verified' => true]);
+                }
                 return response()->json(['message' => 'Shop address added successfully.'], 200);
-            }else{
+            } else {
                 return response()->json(['message' => 'Error while adding shop address.'], 226);
             }
         }
-        
     }
 
     /**
@@ -72,15 +84,39 @@ class ShopAddressController extends Controller
      */
     public function update(Request $request, $id)
     {
-        ShopAddress::where('id',$id)->update([
-            'shop_no'=>$request->shop_no,
-            'street'=>$request->street,
-            'landmark'=>$request->landmark,
-            'city'=>$request->city,
-            'state'=>$request->state,
-            'pincode'=>$request->pincode,
-        ]);
-        return response()->json(['message' => 'Shop address update successfully.'], 200);
+        $seller = Seller::where('id', $id)->first();
+        if ($seller->address_id == null) {
+            $shopAddressId = ShopAddress::insertGetId([
+                'shop_no' => $request->shop_no,
+                'street' => $request->street,
+                'landmark' => $request->landmark,
+                'city' => $request->city,
+                'state' => $request->state,
+                'pincode' => $request->pincode,
+            ]);
+            if ($shopAddressId) {
+                if (Seller::where('id', Auth::user()->id)->update([
+                    'address_id' => $shopAddressId
+                ])) {
+                    if (Seller::where(['id' => Auth::user()->id, ['legal_information_id', '!=', null]])->count() == 1) {
+                        Seller::where('id', Auth::user()->id)->update(['is_verified' => true]);
+                    }
+                    return response()->json(['message' => 'Shop address added successfully.'], 200);
+                } else {
+                    return response()->json(['message' => 'Error while adding shop address.'], 226);
+                }
+            }
+        } else {
+            ShopAddress::where('id', $seller->address_id)->update([
+                'shop_no' => $request->shop_no,
+                'street' => $request->street,
+                'landmark' => $request->landmark,
+                'city' => $request->city,
+                'state' => $request->state,
+                'pincode' => $request->pincode,
+            ]);
+            return response()->json(['message' => 'Shop address update successfully.'], 200);
+        }
     }
 
     /**
@@ -91,12 +127,12 @@ class ShopAddressController extends Controller
      */
     public function destroy($id)
     {
-        if (ShopAddress::where('id',$id)->delete()) {
-            Seller::where('sellers.id',Auth::user()->id)->update([
-                'address_id'=>NULL
+        if (ShopAddress::where('id', $id)->delete()) {
+            Seller::where('sellers.id', Auth::user()->id)->update([
+                'address_id' => NULL
             ]);
-            return response()->json(['message'=>'Shop address delete successfully.'],200);
+            return response()->json(['message' => 'Shop address delete successfully.'], 200);
         }
-        return response()->json(['message'=>'Problem while deleting shop address.'],226);
+        return response()->json(['message' => 'Problem while deleting shop address.'], 226);
     }
 }

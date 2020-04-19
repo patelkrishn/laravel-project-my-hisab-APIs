@@ -24,6 +24,7 @@ Route::group(['namespace' => 'Api\Admin','prefix'=>'admin'], function () {
 Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
     Route::post('login','AuthController@login');
     Route::post('register','AuthController@register');
+    Route::post('seller_update','AuthController@update');
     Route::post('me','AuthController@me')->middleware('auth:seller');
     Route::post('logout','AuthController@logout')->middleware('auth:seller');
     Route::apiResource('product','ProductController')->middleware('auth:seller');

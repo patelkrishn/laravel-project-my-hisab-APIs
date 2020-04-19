@@ -49,6 +49,14 @@ class AuthController extends Controller
         $token = $this->guard()->attempt($credentials);
         return $this->respondWithToken($token);
     }
+    public function update(Request $request){
+        Seller::where('id',$this->guard()->user()->id)->update([
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'mobile'=>$request->mobile,
+        ]);
+        return $this->respondWithToken(auth()->refresh());
+    }
     /**
      * Get the authenticated User.
      *

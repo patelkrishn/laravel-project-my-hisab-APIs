@@ -16,10 +16,11 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $product=Product::where(['seller_id'=>Auth::user()->id,'is_delete'=>0])->get();
-        $output=json_encode($product);
-        return $output;
-        // return response()->json(['products' => $product], 200);
+        $products=Product::where(['seller_id'=>Auth::user()->id,'is_delete'=>0])->get();
+        if ($products==null) {
+            return response()->json(['products'=>[]],200);
+        }
+        return response()->json(['products' => $products], 200);
     }
 
     /**

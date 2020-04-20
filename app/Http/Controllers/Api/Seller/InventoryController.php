@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Model\Seller\Product;
 use App\Model\Seller\Inventory;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller
 {
@@ -16,7 +17,11 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        //
+        $inventories=Inventory::join('products','products.id','=','inventories.product_id')
+                                ->select('inventories.*','products.product_name','products.product_sku')
+                                ->where('inventories.seller_id',Auth::user()->id)
+                                ->get();
+        return response()->json(['inventories'=>$inventories],200); 
     }
 
     /**
@@ -28,13 +33,19 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $product=Product::find($request->product_id);
-        $product->product_stock_quantity=$product->product_stock_quantity+$request->stock_quantity;
+        $total_stock_quantity=$product->product_stock_quantity+$request->stock_quantity;
+        $product->product_stock_quantity=$total_stock_quantity;
         $product->save();
         if (Inventory::create([
             'product_id'=>$request->product_id,
+            'seller_id'=>Auth::user()->id,
             'stock_quantity'=>$request->stock_quantity,
+            'total_stock_quantity'=>$total_stock_quantity,
             'principle_amount'=>$request->principle_amount,
         ])) {
+            Inventory::where('product_id',$request->product_id)->update([
+                'total_stock_quantity'=>$total_stock_quantity
+            ]);
             return response()->json(['message'=>'Inventory added successfully.'],200);
         }else{
             return response()->json(['message'=>'Problem while adding inventory'],204);

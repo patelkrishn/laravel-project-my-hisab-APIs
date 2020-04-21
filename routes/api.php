@@ -21,7 +21,7 @@ Route::group(['namespace' => 'Api\Admin','prefix'=>'admin'], function () {
     // Route::post('logout','AuthController@logout')->middleware('auth:admin');
 });
 
-Route::group(['middleware' => ['cors'],'namespace' => 'Api\Seller','prefix'=>'seller'], function () {
+Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
 
     Route::post('login','AuthController@login');
     Route::post('register','AuthController@register');
@@ -36,7 +36,7 @@ Route::group(['middleware' => ['cors'],'namespace' => 'Api\Seller','prefix'=>'se
 
     Route::apiResource('inventory','InventoryController')->middleware('auth:seller');
     Route::get('inventory/list/{id}','InventoryController@list')->middleware('auth:seller');
-
+    
     Route::apiResource('user','UserController')->middleware('auth:seller');
 
     Route::apiResource('invoices','InvoiceController')->middleware('auth:seller');

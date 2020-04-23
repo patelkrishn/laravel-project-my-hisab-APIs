@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Seller;
 
 use Illuminate\Http\Request;
 use App\Model\Seller\Invoice;
+use App\Model\Seller\Product;
 use App\Model\Seller\InvoiceId;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -17,12 +18,13 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        $invoices=Invoice::join('products','products.id','=','invoices.product_id')
-                            ->select('invoices.*','products.product_name')
-                            ->where(['invoices.seller_id'=>Auth::user()->id,'invoices.status'=>1])->get();
-        $output=json_encode($invoices);
-        return $output;
-        // return response()->json(['invoices' => $invoices], 200);
+        $invoices=InvoiceId::
+                            // join('products','products.id','=','invoices.product_id')
+                            // ->select('invoices.*','products.product_name')
+                            where(['seller_id'=>Auth::user()->id])->get();
+        // $output=json_encode($invoices);
+        // return $output;
+        return response()->json(['invoices' => $invoices], 200);
     }
 
     /**
@@ -42,14 +44,16 @@ class InvoiceController extends Controller
             InvoiceId::create([
                 'invoice_name'=>01,
                 'seller_id'=>Auth::user()->id,
-                'status'=>1,
+                'invoice_amount'=>0,
+                'status'=>false,
             ]);
             return 01;
         }else{
             InvoiceId::create([
                 'invoice_name'=>$invoice_id+1,
                 'seller_id'=>Auth::user()->id,
-                'status'=>1,
+                'invoice_amount'=>0,
+                'status'=>false,
             ]);
             return $invoice_id+1;
         }
@@ -57,54 +61,40 @@ class InvoiceController extends Controller
     
     public function store(Request $request)
     {
-        $invoices=Invoice::where([
-            'seller_id'=>Auth::user()->id,
-            'status'=>1
-        ]);
-        if ($invoices->count() == 0) {
-            $invoice_id=$this->getUniqueInvoiceId();
-            // dd($invoice_id);
+        $invoice_id=$this->getUniqueInvoiceId();
             if ($this->storeData($request->all(),$invoice_id)) {
-                return json_encode(['message'=>'Product added to invoice succesfully.'],200);
+                return json_encode(['message'=>'Product added to invoice succesfully.','invoice_id'=>$invoice_id],200);
             }else{
-                return json_encode(['message'=>'Problem while adding Product to invoice.'],401);
+                return json_encode(['message'=>'Problem while adding Product to invoice.'],423);
             }
-        }else{
-            $invoices=Invoice::where(['seller_id'=>Auth::user()->id,'status'=>1])->first();
-            // dd($invoices['invoice_id']);
-            if ($this->storeData($request->all(),$invoices['invoice_id'])) {
-                return json_encode(['message'=>'Product added to invoice succesfully.'],200);
-            }else{
-                return json_encode(['message'=>'Problem while adding Product to invoice.'],401);
-            }
-        }
+        return response()->json(['message'=>$test],200);
     }
 
     private function storeData($request,$invoice_id)
     {
-        $invoice_data = Invoice::where([
-            'product_id' => $request['product_id'],
-            'seller_id' => Auth::user()->id,
-            'status' => 1
-        ]);
-        if ($invoice_data->count() == 1) {
-            $invoice_data=$invoice_data->first();
-            // dd($invoice_data);
-            $invoice_data->invoice_quantity = $invoice_data->invoice_quantity+$request['invoice_quantity'];
-            $invoice_data->total_amount = $invoice_data->total_amount+$request['total_amount'];
-            // dd($invoice_data->total_amount);
-            return $invoice_data->save();
-        } else {
-            return Invoice::create([
-                'invoice_id' => $invoice_id,
-                'product_id'=>$request['product_id'],
-                'seller_id'=>Auth::user()->id,
-                'invoice_quantity'=>$request['invoice_quantity'],
-                'product_price'=>$request['product_price'],
-                'total_amount'=>$request['total_amount'],
-                'total_payable_amount'=>$request['total_amount'],
-            ]);
+        $total_payable_amount=0;
+        foreach($request as $item){
+            $total_payable_amount=floatval($total_payable_amount)+floatval($item['total_amount']);
         }
+        foreach($request as $item){
+            Invoice::create([
+                'invoice_id' => $invoice_id,
+                'product_id'=>$item['product_id'],
+                'seller_id'=>Auth::user()->id,
+                'invoice_quantity'=>$item['invoice_quantity'],
+                'product_price'=>$item['product_price'],
+                'total_amount'=>$item['total_amount'],
+                'status'=>false,
+                'total_payable_amount'=>$total_payable_amount,
+            ]);
+            $product=Product::where('id',$item['product_id'])->first();
+                Product::where('id',$item['product_id'])->update([
+                    'product_stock_quantity'=>floatval($product->product_stock_quantity)-floatval($item['invoice_quantity']),
+                    'product_total_sales'=>floatval($product->product_total_sales)+floatval($item['invoice_quantity'])
+                ]);
+        } 
+        InvoiceId::where('invoice_name',$invoice_id)->update(['invoice_amount'=>$total_payable_amount]);
+        return true;
         
     }
 
@@ -114,13 +104,13 @@ class InvoiceController extends Controller
      * @param  \App\Model\Seller\Invoice  $invoice
      * @return \Illuminate\Http\Response
      */
-    public function show(Invoice $invoice)
+    public function show($id)
     {
         $invoice=Invoice::join('products','products.id','=','invoices.product_id')
-                        ->where('invoices.id',$invoice->id)
+                        ->where('invoices.invoice_id',$id)
                         ->select('invoices.*','products.product_name')
-                        ->first();
-        return response()->json(['invoice'=>$invoice],200);
+                        ->get();
+        return response()->json(['invoices'=>$invoice],200);
     }
 
     /**

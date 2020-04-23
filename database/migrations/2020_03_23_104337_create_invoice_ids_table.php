@@ -18,6 +18,7 @@ class CreateInvoiceIdsTable extends Migration
             $table->bigInteger('invoice_name');
             $table->bigInteger('seller_id');
             $table->tinyInteger('status');
+            $table->double('invoice_amount')->nullable();
             $table->timestamps();
         });
     }

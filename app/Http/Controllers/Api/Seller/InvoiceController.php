@@ -63,9 +63,9 @@ class InvoiceController extends Controller
     {
         $invoice_id=$this->getUniqueInvoiceId();
             if ($this->storeData($request->all(),$invoice_id)) {
-                return json_encode(['message'=>'Product added to invoice succesfully.','invoice_id'=>$invoice_id],200);
+                return json_encode(['message'=>'Invoice created successfully.','invoice_id'=>$invoice_id],200);
             }else{
-                return json_encode(['message'=>'Problem while adding Product to invoice.'],423);
+                return json_encode(['message'=>'Problem while creating invoice.'],423);
             }
         return response()->json(['message'=>$test],200);
     }

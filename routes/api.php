@@ -40,6 +40,8 @@ Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
     Route::apiResource('user','UserController')->middleware('auth:seller');
 
     Route::apiResource('invoices','InvoiceController')->middleware('auth:seller');
+
+    Route::apiResource('charts','ChartController')->middleware('auth:seller');
 });
 
 Route::group(['namespace' => 'Api\User','prefix'=>'user'], function () {

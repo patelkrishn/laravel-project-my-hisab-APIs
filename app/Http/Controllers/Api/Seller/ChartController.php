@@ -139,7 +139,7 @@ class ChartController extends Controller
             ['created_at','>',$now.' 23:00:00'],
             ['created_at','<',$now.' 24:00:00'],
         ])->sum('total_amount');
-        $output=array(
+        $GChart=array(
             ['Time', 'Sales'],
             ['01 AM', $first],
             ['02 AM', $second],
@@ -166,8 +166,35 @@ class ChartController extends Controller
             ['11 PM', $twentythird],
             ['12 PM', $twentyfourth],
         );
-        // dd($last_24_hour);
-        return response()->json(['charts'=>$output],200);
+        $today_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                            ->whereDate('created_at', $now)
+                            ->sum('total_amount');
+        $this_month_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                                    ->whereMonth('created_at', Carbon::now('+05:30')->format('m'))
+                                    ->whereYear('created_at', Carbon::now('+05:30')->format('Y'))
+                                    ->sum('total_amount');
+        $this_year_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                                ->whereYear('created_at', Carbon::now('+05:30')->format('Y'))
+                                ->sum('total_amount');
+        $yesterday_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                                    ->whereDate('created_at', Carbon::now('+05:30')->subDay()->format('Y-m-d'))
+                                    ->sum('total_amount');
+        $last_month_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                                    ->whereMonth('created_at', Carbon::now('+05:30')->subMonth()->format('m'))
+                                    ->whereYear('created_at', Carbon::now('+05:30')->subMonth()->format('Y'))
+                                    ->sum('total_amount');
+        $last_year_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
+                                ->whereYear('created_at', Carbon::now('+05:30')->subYear()->format('Y'))
+                                ->sum('total_amount');
+        return response()->json([
+            // 'GChart'=>$GChart,
+            'todaySales'=>$today_sales,
+            'thisMonthSales'=>$this_month_sales,
+            'thisYearSales'=>$this_year_sales,
+            'yesterdaySales'=>$yesterday_sales,
+            'lastMonthSales'=>$last_month_sales,
+            'lastYearSales'=>$last_year_sales,
+        ],200);
     }
 
     /**

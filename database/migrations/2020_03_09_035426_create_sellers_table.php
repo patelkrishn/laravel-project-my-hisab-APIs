@@ -21,7 +21,7 @@ class CreateSellersTable extends Migration
             $table->string('password');
             $table->integer('address_id')->nullable();
             $table->integer('legal_information_id')->nullable();
-            $table->tinyInteger('is_verified');
+            $table->tinyInteger('is_verified')->default(false);
             $table->timestamps();
         });
     }

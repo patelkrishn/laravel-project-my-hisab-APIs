@@ -20,6 +20,7 @@ class CreateInventoriesTable extends Migration
             $table->bigInteger('stock_quantity');
             $table->bigInteger('total_stock_quantity');
             $table->double('principle_amount')->default(0)->nullable();
+            $table->double('paid_amount')->default(0)->nullable();
             $table->timestamps();
         });
     }

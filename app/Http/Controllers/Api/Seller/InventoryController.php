@@ -36,12 +36,15 @@ class InventoryController extends Controller
         $total_stock_quantity=$product->product_stock_quantity+$request->stock_quantity;
         $product->product_stock_quantity=$total_stock_quantity;
         $product->save();
+        // $paid_amount=0;
+        $paid_amount=$request->principle_amount*$request->stock_quantity;
         if (Inventory::create([
             'product_id'=>$request->product_id,
             'seller_id'=>Auth::user()->id,
             'stock_quantity'=>$request->stock_quantity,
             'total_stock_quantity'=>$total_stock_quantity,
             'principle_amount'=>$request->principle_amount,
+            'paid_amount'=>$paid_amount
         ])) {
             Inventory::where('product_id',$request->product_id)->update([
                 'total_stock_quantity'=>$total_stock_quantity

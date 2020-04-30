@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Inventory extends Model
 {
     protected $fillable=[
-        'product_id','stock_quantity','principle_amount','seller_id','total_stock_quantity',
+        'product_id','stock_quantity','principle_amount','seller_id','total_stock_quantity','paid_amount',
     ];
 }

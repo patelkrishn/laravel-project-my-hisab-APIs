@@ -54,7 +54,8 @@ class ChartController extends Controller
                 'theme'=>array(
                     'palette'=>'palette10'
                 ),
-                'labels'=>array()
+                'labels'=>array(),
+                'grid'=>['show'=>false]
             )
         );
         foreach ($highestSaleData as $item) {

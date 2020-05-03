@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use App\Model\Seller\Invoice;
 use App\Model\Seller\Product;
@@ -46,6 +47,20 @@ class ChartController extends Controller
         foreach (Product::where(['seller_id'=>Auth::user()->id])->get() as $item) {
             $earning_today_so_far=$earning_today_so_far+($item->product_total_sales*$item->product_price);
         }
+        $highestSaleData=Product::where(['seller_id'=>Auth::user()->id])->select('product_name','product_total_sales')->get();
+        $highestSale=array(
+            'series'=>array(),
+            'options'=>array(
+                'theme'=>array(
+                    'palette'=>'palette10'
+                ),
+                'labels'=>array()
+            )
+        );
+        foreach ($highestSaleData as $item) {
+            array_push($highestSale['series'],$item->product_total_sales);
+            array_push($highestSale['options']['labels'],$item->product_name);
+        }
         return response()->json([
             'todaySales'=>$today_sales,
             'thisMonthSales'=>$this_month_sales,
@@ -55,6 +70,7 @@ class ChartController extends Controller
             'lastYearSales'=>$last_year_sales,
             'expenseTodaySoFar'=>$expense_today_so_far,
             'earningTodaySoFar'=>$earning_today_so_far,
+            'highestSale'=>$highestSale
         ],200);
     }
 

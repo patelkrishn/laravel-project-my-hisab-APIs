@@ -40,6 +40,7 @@ Route::group(['namespace' => 'Api\Seller','prefix'=>'seller'], function () {
     Route::apiResource('user','UserController')->middleware('auth:seller');
 
     Route::apiResource('invoices','InvoiceController')->middleware('auth:seller');
+    Route::get('invoices/print/{id}','InvoiceController@print');
 
     Route::apiResource('charts','ChartController')->middleware('auth:seller');
 });

@@ -27,6 +27,12 @@ class InvoiceController extends Controller
         return response()->json(['invoices' => $invoices], 200);
     }
 
+    public function print($id)
+    {
+        $invoices=Invoice::where('invoice_id',$id)->get();
+        return $invoices;
+    }
+
     /**
      * Show the form for creating a new resource.
      *

@@ -22,6 +22,25 @@ class ChartController extends Controller
     {
         $now=Carbon::now('+05:30')->format('Y-m-d');
         
+        $days_in_this_month=Carbon::now()->daysInMonth;
+        $this_month_sales_graph=[
+            'data'=>[],
+            'categories'=>[],
+        ];
+        for ($i=1; $i <= Carbon::now('+05:30')->format('d'); $i++) { 
+            $date=$i;
+            $month=Carbon::now('+05:30')->format('m');
+            $year=Carbon::now('+05:30')->format('Y');
+
+            $data=Invoice::where(['seller_id'=>Auth::user()->id,])
+                        ->whereDate('created_at', $year.'-'.$month.'-'.$i)
+                        ->whereMonth('created_at', $month)
+                        ->whereYear('created_at', $year)
+                        ->sum('total_amount');
+
+            array_push($this_month_sales_graph['categories'],$i);
+            array_push($this_month_sales_graph['data'],$data);
+        }
         $today_sales=Invoice::where(['seller_id'=>Auth::user()->id,])
                             ->whereDate('created_at', $now)
                             ->sum('total_amount');
@@ -47,20 +66,19 @@ class ChartController extends Controller
         foreach (Product::where(['seller_id'=>Auth::user()->id])->get() as $item) {
             $earning_today_so_far=$earning_today_so_far+($item->product_total_sales*$item->product_price);
         }
-        $highestSaleData=Product::where(['seller_id'=>Auth::user()->id])->select('product_name','product_total_sales')->get();
-        $highestSale=array(
-            'series'=>array(),
-            'options'=>array(
-                'theme'=>array(
-                    'palette'=>'palette10'
-                ),
-                'labels'=>array(),
-                'grid'=>['show'=>false]
-            )
-        );
+        $highestSaleData=Product::join('invoices','invoices.product_id','=','products.id')
+                                ->where(['invoices.seller_id'=>Auth::user()->id,])
+                                ->whereMonth('invoices.created_at', Carbon::now('+05:30')->format('m'))
+                                ->whereYear('invoices.created_at', Carbon::now('+05:30')->format('Y'))
+                                ->select('products.product_name','invoices.invoice_quantity')
+                                ->get();
+        $highestSale=[
+            'series'=>[],
+            'labels'=>[]
+        ];
         foreach ($highestSaleData as $item) {
-            array_push($highestSale['series'],$item->product_total_sales);
-            array_push($highestSale['options']['labels'],$item->product_name);
+            array_push($highestSale['series'],$item->invoice_quantity);
+            array_push($highestSale['labels'],$item->product_name);
         }
         return response()->json([
             'todaySales'=>$today_sales,
@@ -71,7 +89,8 @@ class ChartController extends Controller
             'lastYearSales'=>$last_year_sales,
             'expenseTodaySoFar'=>$expense_today_so_far,
             'earningTodaySoFar'=>$earning_today_so_far,
-            'highestSale'=>$highestSale
+            'highestSale'=>$highestSale,
+            'thisMonthSalesGraph'=>$this_month_sales_graph
         ],200);
     }
 

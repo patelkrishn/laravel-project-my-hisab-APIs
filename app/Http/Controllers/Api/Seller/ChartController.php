@@ -66,20 +66,26 @@ class ChartController extends Controller
         foreach (Product::where(['seller_id'=>Auth::user()->id])->get() as $item) {
             $earning_today_so_far=$earning_today_so_far+($item->product_total_sales*$item->product_price);
         }
-        $highestSaleData=Product::join('invoices','invoices.product_id','=','products.id')
-                                ->where(['invoices.seller_id'=>Auth::user()->id,])
-                                ->whereMonth('invoices.created_at', Carbon::now('+05:30')->format('m'))
-                                ->whereYear('invoices.created_at', Carbon::now('+05:30')->format('Y'))
-                                ->select('products.product_name','invoices.invoice_quantity')
-                                ->get();
+        // $highestSaleData=Product::join('invoices','invoices.product_id','=','products.id')
+        //                         ->where(['invoices.seller_id'=>Auth::user()->id,])
+        //                         ->whereMonth('invoices.created_at', Carbon::now('+05:30')->format('m'))
+        //                         ->whereYear('invoices.created_at', Carbon::now('+05:30')->format('Y'))
+        //                         ->select('products.product_name','invoices.invoice_quantity')
+        //                         ->get();
         $highestSale=[
             'invoiceQuantity'=>[],
             'productName'=>[]
         ];
-        foreach ($highestSaleData as $item) {
-            array_push($highestSale['invoiceQuantity'],$item->invoice_quantity);
+        $productName=Product::where(['seller_id'=>Auth::user()->id])->get();
+        foreach ($productName as $item) {
+            $invoice_quantity=Invoice::where('product_id',$item->id)->sum('invoice_quantity');
+            array_push($highestSale['invoiceQuantity'],floatval($invoice_quantity));
             array_push($highestSale['productName'],$item->product_name);
         }
+        // foreach ($highestSaleData as $item) {
+        //     array_push($highestSale['invoiceQuantity'],$item->invoice_quantity);
+        //     array_push($highestSale['productName'],$item->product_name);
+        // }
         return response()->json([
             'todaySales'=>$today_sales,
             'thisMonthSales'=>$this_month_sales,

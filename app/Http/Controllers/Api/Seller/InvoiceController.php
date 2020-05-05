@@ -29,8 +29,11 @@ class InvoiceController extends Controller
 
     public function print($id)
     {
-        $invoices=Invoice::where('invoice_id',$id)->get();
-        return $invoices;
+        $invoices=Product::join('invoices','invoices.product_id','=','products.id')
+                            ->where('invoices.invoice_id',$id)
+                                ->get();
+        // return ['invoices',$invoices];
+        return view('invoice_print')->with('invoices',$invoices);
     }
 
     /**
